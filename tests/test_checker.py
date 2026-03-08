@@ -8,6 +8,25 @@ from src.checker import (
 )
 
 
+def test_analyze_password():
+    """Testa tutti i livelli di giudizio sulla robustezza."""
+    # 1. Livello: Pessima (Password cortissima o molto comune)
+    livello, _ = analyze_password("123456")
+    assert livello == "Pessima"
+
+    # 2. Livello: Debole (Corta e senza varietà)
+    livello, _ = analyze_password("sololeggere")
+    assert livello == "Debole"
+
+    # 3. Livello: Media (Lunghezza ok, ma manca qualche criterio)
+    # Ad esempio: solo lettere e numeri, senza caratteri speciali
+    livello, _ = analyze_password("Progetto2024")
+    assert livello == "Media"
+
+    # 4. Livello: Forte (Lunga, maiuscole, numeri e caratteri speciali)
+    livello, _ = analyze_password("P@ssw0rdSicura2025!!")
+    assert livello == "Forte"
+
 
 def test_calculate_entropy():
     """Testa il calcolo dell'entropia."""
