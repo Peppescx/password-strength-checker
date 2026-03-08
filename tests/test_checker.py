@@ -47,6 +47,3 @@ def test_is_commonly_used():
     # Questo funzionerà se hai creato data/common_passwords.txt
     assert is_commonly_used("123456") is True
     assert is_commonly_used("UnaPasswordMoltoRara2026!") is False
-
-
-

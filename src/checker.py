@@ -108,4 +108,3 @@ def analyze_password(password: str) -> tuple[str, list[str]]:
         level = "Forte"
 
     return level, missing
-
