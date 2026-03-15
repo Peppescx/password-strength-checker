@@ -3,6 +3,7 @@
 from src.checker import (
     analyze_password,
     calculate_entropy,
+    generate_secure_password,
     is_commonly_used,
     validate_email,
 )
@@ -47,3 +48,11 @@ def test_is_commonly_used():
     # Questo funzionerà se hai creato data/common_passwords.txt
     assert is_commonly_used("123456") is True
     assert is_commonly_used("UnaPasswordMoltoRara2026!") is False
+
+
+def test_generate_password_variants():
+    """Testa la generazione con e senza caratteri speciali."""
+    pwd1 = generate_secure_password(length=16, use_special=True)
+    assert len(pwd1) == 16
+    pwd2 = generate_secure_password(length=8, use_special=False)
+    assert len(pwd2) == 8
