@@ -6,8 +6,8 @@ from src.checker import (
     calculate_entropy,
     generate_secure_password,
     is_commonly_used,
+    save_report,
     validate_email,
-    save_report
 )
 
 
@@ -58,7 +58,8 @@ def test_generate_password_variants():
     assert len(pwd1) == 16
     pwd2 = generate_secure_password(length=8, use_special=False)
     assert len(pwd2) == 8
-    
+
+
 def test_save_report_execution():
     """Testa il salvataggio fisico del file JSON."""
     test_file = "test_result.json"
