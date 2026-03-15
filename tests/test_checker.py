@@ -9,6 +9,7 @@ from src.checker import (
     is_commonly_used,
     save_report,
     validate_email,
+    get_strength_bar
 )
 
 
@@ -70,3 +71,20 @@ def test_save_report_execution():
     # Pulizia dopo il test
     if os.path.exists(test_file):
         os.remove(test_file)
+        
+def test_strength_bar_weak():
+    """Verifica che una password debole produca una barra con blocchi vuoti"""
+    strength_bar = get_strength_bar("abc")
+    assert "░" in strength_bar
+
+
+def test_strength_bar_strong():
+    """Verifica che una password forte produca una barra con blocchi pieni"""
+    strength_bar = get_strength_bar("Complessa_!@_99_Z")
+    assert "█" in strength_bar
+
+
+def test_strength_bar_format():
+    """Verifica che l'output contenga una percentuale"""
+    strength_bar = get_strength_bar("Password123!")
+    assert "%" in strength_bar
