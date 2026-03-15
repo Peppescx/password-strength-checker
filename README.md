@@ -18,6 +18,29 @@ A Python-based command-line tool for password strength analysis, entropy calcula
 - **JSON Report Generation**  
   Allows exporting the results of the password analysis into a structured JSON report.
 
+## ▶️ Usage Example
+
+Example of password analysis:
+
+```bash
+=== Security Tool v2.0 ===
+1. Analyze a password
+2. Generate a secure password
+3. Exit
+
+Choose an option: 1
+Enter password: password123
+
+--- Security Analysis ---
+Level: Debole
+Strength: ██░░░░░░░░ 23%
+Entropy: 18.8 bits
+
+Detected issues:
+[!] Missing special character
+[!] Low entropy
+```
+
 # Struttura del progetto
 ## 📁 Project Structure
 
@@ -66,6 +89,36 @@ project/
     1. Analyze a password
     2. Generate a secure password
     3. Exit
+
+
+## 🧪 Running Tests
+
+The project includes a full test suite implemented with **pytest**.
+
+Run all tests with:
+
+```bash
+pytest
+```
+
+To check test coverage:
+```bash
+pytest --cov=src --cov-report=term-missing
+```
+
+## 🧰 Development Tools
+
+The project uses several tools to ensure code quality:
+
+| Tool | Purpose |
+|-----|-----|
+| pytest | unit testing |
+| pytest-cov | test coverage |
+| pylint | static code analysis |
+| flake8 | style checking |
+| black | code formatting |
+| isort | import sorting |
+| mypy | static type checking |
 
 ## 👨‍💻 Author
 
