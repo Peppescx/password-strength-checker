@@ -6,6 +6,7 @@ from src.checker import (
     analyze_password,
     calculate_entropy,
     generate_secure_password,
+    get_password_criteria,
     get_strength_bar,
     is_commonly_used,
     save_report,
@@ -33,8 +34,26 @@ def test_analyze_password():
     assert livello == "Forte"
 
 
+def test_password_criteria():
+    """
+    Verifica che la funzione get_password_criteria identifichi
+    correttamente tutti i criteri di sicurezza soddisfatti da
+    una password complessa.
+    """
+    criteria = get_password_criteria("Password1!")
+    assert criteria["length"][0] is True
+    assert criteria["lowercase"][0] is True
+    assert criteria["uppercase"][0] is True
+    assert criteria["numbers"][0] is True
+    assert criteria["special"][0] is True
+
+
 def test_calculate_entropy():
     """Testa il calcolo dell'entropia."""
+    # Password vuota
+    assert calculate_entropy("") == 0.0
+    # Pool = 0 (solo spazi)
+    assert calculate_entropy("   ") == 0.0
     # Password corta solo minuscole = entropia bassa
     assert calculate_entropy("abc") < 20
     # Password complessa = entropia alta
@@ -45,6 +64,7 @@ def test_validate_email():
     """Testa la validazione delle email."""
     assert validate_email("test@unict.it") is True
     assert validate_email("email_errata.it") is False
+    assert validate_email("TEST@MAIL.COM") is True
 
 
 def test_is_commonly_used():
@@ -54,12 +74,47 @@ def test_is_commonly_used():
     assert is_commonly_used("UnaPasswordMoltoRara2026!") is False
 
 
+def test_is_commonly_used_missing_file(monkeypatch):
+    """
+    Simula il caso in cui il file contenente le password comuni
+    non sia presente nel filesystem.
+    """
+    monkeypatch.setattr("os.path.exists", lambda x: False)
+    assert is_commonly_used("123456") is False
+
+
+def test_is_commonly_used_io_error(monkeypatch):
+    """
+    Verifica la gestione di errori di I/O durante la lettura del file
+    delle password comuni.
+    """
+
+    def mock_open(*args, **kwargs):
+        raise OSError
+
+    monkeypatch.setattr("builtins.open", mock_open)
+    assert is_commonly_used("password") is False
+
+
 def test_generate_password_variants():
     """Testa la generazione con e senza caratteri speciali."""
     pwd1 = generate_secure_password(length=16, use_special=True)
     assert len(pwd1) == 16
     pwd2 = generate_secure_password(length=8, use_special=False)
     assert len(pwd2) == 8
+
+
+def test_generate_password_contains_special():
+    """
+    Verifica che la funzione generate_secure_password produca
+    effettivamente password contenenti caratteri speciali quando
+    l'opzione use_special è attiva.
+
+    Il test controlla che almeno uno dei caratteri speciali previsti
+    sia presente nella password generata.
+    """
+    pwd = generate_secure_password(length=20, use_special=True)
+    assert any(c in '!@#$%^&*(),.?":{}|<>' for c in pwd)
 
 
 def test_save_report_execution():
@@ -71,6 +126,19 @@ def test_save_report_execution():
     # Pulizia dopo il test
     if os.path.exists(test_file):
         os.remove(test_file)
+
+
+def test_save_report_io_error(monkeypatch):
+    """
+    Testa il comportamento della funzione save_report quando si verifica
+    un errore di scrittura sul filesystem.
+    """
+
+    def mock_open(*args, **kwargs):
+        raise IOError
+
+    monkeypatch.setattr("builtins.open", mock_open)
+    assert save_report("Password123!") is False
 
 
 def test_strength_bar_weak():
