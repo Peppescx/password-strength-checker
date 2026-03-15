@@ -1,4 +1,6 @@
 """Unit test per il modulo src.checker."""
+
+
 import os
 
 from src.checker import (
