@@ -3,6 +3,7 @@ Modulo avanzato per la verifica della robustezza delle password.
 Include analisi dettagliata dei criteri e feedback per l'utente.
 """
 
+import json
 import math
 import os
 import re
@@ -131,3 +132,23 @@ def generate_secure_password(length: int = 12, use_special: bool = True) -> str:
             if use_special and not any(c in '!@#$%^&*(),.?":{}|<>' for c in password):
                 continue
             return password
+
+
+def save_report(password: str, filename: str = "result.json") -> bool:
+    """
+    Genera un report completo e lo salva in formato JSON.
+    """
+    level, issues = analyze_password(password)
+    report = {
+        "password_analizzata": "*" * len(password),  # Oscuriamo per sicurezza
+        "livello": level,
+        "criticità": issues,
+        "punteggio": f"{5 - len(issues)}/5",
+    }
+
+    try:
+        with open(filename, "w", encoding="utf-8") as f:
+            json.dump(report, f, indent=4)
+        return True
+    except IOError:
+        return False

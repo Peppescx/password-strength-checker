@@ -1,4 +1,5 @@
 """Unit test per il modulo src.checker."""
+import os
 
 from src.checker import (
     analyze_password,
@@ -6,6 +7,7 @@ from src.checker import (
     generate_secure_password,
     is_commonly_used,
     validate_email,
+    save_report
 )
 
 
@@ -56,3 +58,13 @@ def test_generate_password_variants():
     assert len(pwd1) == 16
     pwd2 = generate_secure_password(length=8, use_special=False)
     assert len(pwd2) == 8
+    
+def test_save_report_execution():
+    """Testa il salvataggio fisico del file JSON."""
+    test_file = "test_result.json"
+    result = save_report("TestPassword123!", filename=test_file)
+    assert result is True
+    assert os.path.exists(test_file)
+    # Pulizia dopo il test
+    if os.path.exists(test_file):
+        os.remove(test_file)
