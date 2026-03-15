@@ -2,6 +2,8 @@
 
 import os
 
+import pytest
+
 from src.checker import (
     analyze_password,
     calculate_entropy,
@@ -14,24 +16,24 @@ from src.checker import (
 )
 
 
-def test_analyze_password():
+@pytest.mark.parametrize(
+    "password,expected_level",
+    [
+        # 1. Livello: Pessima (Password cortissima o molto comune)
+        ("123456", "Pessima"),
+        # 2. Livello: Debole (Corta e senza varietà)
+        ("sololeggere", "Debole"),
+        # 3. Livello: Media (Lunghezza ok, ma manca qualche criterio)
+        # Ad esempio: solo lettere e numeri, senza caratteri speciali
+        ("Progetto2024", "Media"),
+        # 4. Livello: Forte (Lunga, maiuscole, numeri e caratteri speciali)
+        ("P@ssw0rdSicura2025!!", "Forte"),
+    ],
+)
+def test_analyze_password(password, expected_level):
     """Testa tutti i livelli di giudizio sulla robustezza."""
-    # 1. Livello: Pessima (Password cortissima o molto comune)
-    livello, _ = analyze_password("123456")
-    assert livello == "Pessima"
-
-    # 2. Livello: Debole (Corta e senza varietà)
-    livello, _ = analyze_password("sololeggere")
-    assert livello == "Debole"
-
-    # 3. Livello: Media (Lunghezza ok, ma manca qualche criterio)
-    # Ad esempio: solo lettere e numeri, senza caratteri speciali
-    livello, _ = analyze_password("Progetto2024")
-    assert livello == "Media"
-
-    # 4. Livello: Forte (Lunga, maiuscole, numeri e caratteri speciali)
-    livello, _ = analyze_password("P@ssw0rdSicura2025!!")
-    assert livello == "Forte"
+    livello, _ = analyze_password(password)
+    assert livello == expected_level
 
 
 def test_password_criteria():
@@ -48,30 +50,48 @@ def test_password_criteria():
     assert criteria["special"][0] is True
 
 
-def test_calculate_entropy():
+@pytest.mark.parametrize(
+    "password,condition",
+    [
+        # Password vuota
+        ("", lambda x: x == 0.0),
+        # Pool = 0 (solo spazi)
+        ("   ", lambda x: x == 0.0),
+        # Password corta solo minuscole = entropia bassa
+        ("abc", lambda x: x < 20),
+        # Password complessa = entropia alta
+        ("A1!b2C3#d4E5", lambda x: x > 50),
+    ],
+)
+def test_calculate_entropy(password, condition):
     """Testa il calcolo dell'entropia."""
-    # Password vuota
-    assert calculate_entropy("") == 0.0
-    # Pool = 0 (solo spazi)
-    assert calculate_entropy("   ") == 0.0
-    # Password corta solo minuscole = entropia bassa
-    assert calculate_entropy("abc") < 20
-    # Password complessa = entropia alta
-    assert calculate_entropy("A1!b2C3#d4E5") > 50
+    assert condition(calculate_entropy(password))
 
 
-def test_validate_email():
+@pytest.mark.parametrize(
+    "email,expected",
+    [
+        ("test@unict.it", True),
+        ("email_errata.it", False),
+        ("TEST@MAIL.COM", True),
+    ],
+)
+def test_validate_email(email, expected):
     """Testa la validazione delle email."""
-    assert validate_email("test@unict.it") is True
-    assert validate_email("email_errata.it") is False
-    assert validate_email("TEST@MAIL.COM") is True
+    assert validate_email(email) is expected
 
 
-def test_is_commonly_used():
+@pytest.mark.parametrize(
+    "password,expected",
+    [
+        # Questo funzionerà se hai creato data/common_passwords.txt
+        ("123456", True),
+        ("UnaPasswordMoltoRara2026!", False),
+    ],
+)
+def test_is_commonly_used(password, expected):
     """Testa il rilevamento di password comuni."""
-    # Questo funzionerà se hai creato data/common_passwords.txt
-    assert is_commonly_used("123456") is True
-    assert is_commonly_used("UnaPasswordMoltoRara2026!") is False
+    assert is_commonly_used(password) is expected
 
 
 def test_is_commonly_used_missing_file(monkeypatch):
@@ -141,16 +161,18 @@ def test_save_report_io_error(monkeypatch):
     assert save_report("Password123!") is False
 
 
-def test_strength_bar_weak():
-    """Verifica che una password debole produca una barra con blocchi vuoti"""
-    strength_bar = get_strength_bar("abc")
-    assert "░" in strength_bar
-
-
-def test_strength_bar_strong():
-    """Verifica che una password forte produca una barra con blocchi pieni"""
-    strength_bar = get_strength_bar("Complessa_!@_99_Z")
-    assert "█" in strength_bar
+@pytest.mark.parametrize(
+    "password,expected_symbol",
+    [
+        # Verifica che una password debole produca una barra con blocchi vuoti
+        ("abc", "░"),
+        # Verifica che una password forte produca una barra con blocchi pieni
+        ("Complessa_!@_99_Z", "█"),
+    ],
+)
+def test_strength_bar_symbols(password, expected_symbol):
+    strength_bar = get_strength_bar(password)
+    assert expected_symbol in strength_bar
 
 
 def test_strength_bar_format():
