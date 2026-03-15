@@ -35,6 +35,10 @@ def test_analyze_password():
 
 def test_calculate_entropy():
     """Testa il calcolo dell'entropia."""
+    # Password vuota
+    assert calculate_entropy("") == 0.0
+    # Pool = 0 (solo spazi)
+    assert calculate_entropy("   ") == 0.0
     # Password corta solo minuscole = entropia bassa
     assert calculate_entropy("abc") < 20
     # Password complessa = entropia alta
@@ -45,6 +49,7 @@ def test_validate_email():
     """Testa la validazione delle email."""
     assert validate_email("test@unict.it") is True
     assert validate_email("email_errata.it") is False
+    assert validate_email("TEST@MAIL.COM") is True
 
 
 def test_is_commonly_used():
