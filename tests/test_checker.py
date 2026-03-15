@@ -1,6 +1,7 @@
 """Unit test per il modulo src.checker."""
 
 import os
+
 import pytest
 
 from src.checker import (
