@@ -6,8 +6,8 @@ Include analisi dettagliata dei criteri e feedback per l'utente.
 import math
 import os
 import re
-import string
 import secrets
+import string
 
 
 def calculate_entropy(password: str) -> float:
@@ -110,6 +110,7 @@ def analyze_password(password: str) -> tuple[str, list[str]]:
         level = "Forte"
 
     return level, missing
+
 
 def generate_secure_password(length: int = 12, use_special: bool = True) -> str:
     """
