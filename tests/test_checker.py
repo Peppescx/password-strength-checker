@@ -6,10 +6,10 @@ from src.checker import (
     analyze_password,
     calculate_entropy,
     generate_secure_password,
+    get_strength_bar,
     is_commonly_used,
     save_report,
     validate_email,
-    get_strength_bar
 )
 
 
@@ -71,7 +71,8 @@ def test_save_report_execution():
     # Pulizia dopo il test
     if os.path.exists(test_file):
         os.remove(test_file)
-        
+
+
 def test_strength_bar_weak():
     """Verifica che una password debole produca una barra con blocchi vuoti"""
     strength_bar = get_strength_bar("abc")
