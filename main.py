@@ -2,6 +2,7 @@ from src.checker import (
     analyze_password,
     calculate_entropy,
     generate_secure_password,
+    save_report,
     validate_email,
 )
 
@@ -36,10 +37,12 @@ def main():
         # Richiesta email per il report con validazione
         email = input("\nInserisci la tua email per il report: ")
         if validate_email(email):
-            # report da fare
-            print("salvare dati..")
+            if save_report(pwd):
+                print(f"Report salvato con successo per l'utente: {email}")
+            else:
+                print("Errore durante il salvataggio del file JSON.")
         else:
-            print("Email non valida. Il report non verrà salvato.")
+            print("Email non valida. Il report non verrà salvato con metadati utente.")
 
     elif scelta == "2":
         try:
