@@ -138,11 +138,16 @@ def test_generate_password_contains_special():
 
 
 def test_save_report_execution():
-    """Testa il salvataggio fisico del file JSON."""
+    """Testa il salvataggio fisico del file JSON con email inclusa."""
     test_file = "test_result.json"
-    result = save_report("TestPassword123!", filename=test_file)
+    test_email = "studente@studium.unict.it"
+
+    # Aggiunto test_email come secondo argomento
+    result = save_report("TestPassword123!", test_email, filename=test_file)
+
     assert result is True
     assert os.path.exists(test_file)
+
     # Pulizia dopo il test
     if os.path.exists(test_file):
         os.remove(test_file)
@@ -150,15 +155,28 @@ def test_save_report_execution():
 
 def test_save_report_io_error(monkeypatch):
     """
-    Testa il comportamento della funzione save_report quando si verifica
-    un errore di scrittura sul filesystem.
+    Testa il comportamento di save_report quando si verifica un errore IO.
     """
 
     def mock_open(*args, **kwargs):
         raise IOError
 
     monkeypatch.setattr("builtins.open", mock_open)
-    assert save_report("Password123!") is False
+
+    # Aggiunto un'email fittizia per soddisfare la firma della funzione
+    assert save_report("Password123!", "error@test.com") is False
+
+
+@pytest.mark.parametrize(
+    "email", ["test@unict.it", "UTENTE@STUDIUM.UNICT.IT", "  spazi@test.com  "]
+)
+def test_save_report_with_various_emails(email):
+    """Verifica che save_report funzioni con diversi formati di email."""
+    # Usiamo una password fissa, ci interessa solo testare la mail qui
+    assert save_report("Password123!", email) is True
+
+    if os.path.exists("result.json"):
+        os.remove("result.json")
 
 
 @pytest.mark.parametrize(

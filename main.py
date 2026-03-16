@@ -40,7 +40,7 @@ def main():
         # Richiesta email per il report con validazione
         email = input("\nInserisci la tua email per il report: ")
         if validate_email(email):
-            if save_report(pwd):
+            if save_report(pwd, email):
                 print(f"Report salvato con successo per l'utente: {email}")
             else:
                 print("Errore durante il salvataggio del file JSON.")
@@ -50,7 +50,7 @@ def main():
     elif scelta == "2":
         try:
             lunghezza = int(input("Lunghezza desiderata (default 12, min 8): ") or 12)
-            if lunghezza < 1:
+            if lunghezza < 8:
                 print("Lunghezza non valida, imposto default a 12.")
                 lunghezza = 12
 

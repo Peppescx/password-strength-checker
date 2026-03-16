@@ -134,13 +134,16 @@ def generate_secure_password(length: int = 12, use_special: bool = True) -> str:
             return password
 
 
-def save_report(password: str, filename: str = "result.json") -> bool:
+def save_report(password: str, email: str, filename: str = "result.json") -> bool:
     """
-    Genera un report completo e lo salva in formato JSON.
+    Generates a comprehensive report and saves it in JSON format.
+    Includes the analyzed email and the masked password for security.
     """
     level, issues = analyze_password(password)
+
     report = {
-        "password_analizzata": "*" * len(password),  # Oscuriamo per sicurezza
+        "email": email,
+        "password_analizzata": "*" * len(password),  # Masked for security
         "livello": level,
         "criticità": issues,
         "punteggio": f"{5 - len(issues)}/5",
@@ -148,9 +151,10 @@ def save_report(password: str, filename: str = "result.json") -> bool:
 
     try:
         with open(filename, "w", encoding="utf-8") as f:
-            json.dump(report, f, indent=4)
+            json.dump(report, f, indent=4, ensure_ascii=False)
         return True
-    except IOError:
+    except (IOError, OSError):
+        # Gestione errori di scrittura (es. permessi negati o disco pieno)
         return False
 
 
