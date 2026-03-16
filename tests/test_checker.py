@@ -1,6 +1,7 @@
 """Unit test per il modulo src.checker."""
 
 import os
+import secrets
 
 import pytest
 
@@ -34,6 +35,44 @@ def test_analyze_password(password, expected_level):
     """Testa tutti i livelli di giudizio sulla robustezza."""
     livello, _ = analyze_password(password)
     assert livello == expected_level
+
+
+def test_analyze_password_low_entropy(monkeypatch):
+    """
+    Forza l'esecuzione del blocco if entropy < 40.
+    """
+    # Evitiamo che la password venga scartata prima dal controllo leak
+    monkeypatch.setattr("src.checker.is_commonly_used", lambda x: False)
+
+    # 'aA1' è corta (3 char) -> Entropia sicuramente minore di 40
+    _, missing = analyze_password("aA1")
+
+    # Verifichiamo che il messaggio sull'entropia sia nella lista
+    assert any("Entropia bassa" in msg for msg in missing)
+
+
+def test_generate_password_continue_branch(monkeypatch):
+    """
+    Forza il 'continue' simulando una prima generazione di password
+    valida per maiuscole/numeri, ma priva di caratteri speciali.
+    """
+
+    # Creiamo un generatore che restituisce i caratteri uno per uno.
+    # Primi 12 caratteri: perfetti ma SENZA speciali (forza il continue)
+    # Secondi 12 caratteri: perfetti e CON il carattere '!' (passa il test)
+    mock_sequence = iter(
+        ["a", "B", "1", "c", "d", "e", "f", "g", "h", "i", "j", "k"]
+        + ["a", "B", "1", "!", "d", "e", "f", "g", "h", "i", "j", "k"]
+    )
+
+    # Sostituiamo il motore casuale con la nostra sequenza truccata
+    monkeypatch.setattr(secrets, "choice", lambda alphabet: next(mock_sequence))
+
+    pwd = generate_secure_password(length=12, use_special=True)
+
+    # Se il test arriva qui, significa che ha fatto il loop col continue
+    # ed è uscito con la seconda password
+    assert pwd == "aB1!defghijk"
 
 
 def test_password_criteria():
@@ -138,11 +177,16 @@ def test_generate_password_contains_special():
 
 
 def test_save_report_execution():
-    """Testa il salvataggio fisico del file JSON."""
+    """Testa il salvataggio fisico del file JSON con email inclusa."""
     test_file = "test_result.json"
-    result = save_report("TestPassword123!", filename=test_file)
+    test_email = "studente@studium.unict.it"
+
+    # Aggiunto test_email come secondo argomento
+    result = save_report("TestPassword123!", test_email, filename=test_file)
+
     assert result is True
     assert os.path.exists(test_file)
+
     # Pulizia dopo il test
     if os.path.exists(test_file):
         os.remove(test_file)
@@ -150,15 +194,28 @@ def test_save_report_execution():
 
 def test_save_report_io_error(monkeypatch):
     """
-    Testa il comportamento della funzione save_report quando si verifica
-    un errore di scrittura sul filesystem.
+    Testa il comportamento di save_report quando si verifica un errore IO.
     """
 
     def mock_open(*args, **kwargs):
         raise IOError
 
     monkeypatch.setattr("builtins.open", mock_open)
-    assert save_report("Password123!") is False
+
+    # Aggiunto un'email fittizia per soddisfare la firma della funzione
+    assert save_report("Password123!", "error@test.com") is False
+
+
+@pytest.mark.parametrize(
+    "email", ["test@unict.it", "UTENTE@STUDIUM.UNICT.IT", "  spazi@test.com  "]
+)
+def test_save_report_with_various_emails(email):
+    """Verifica che save_report funzioni con diversi formati di email."""
+    # Usiamo una password fissa, ci interessa solo testare la mail qui
+    assert save_report("Password123!", email) is True
+
+    if os.path.exists("result.json"):
+        os.remove("result.json")
 
 
 @pytest.mark.parametrize(

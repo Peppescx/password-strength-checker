@@ -122,6 +122,8 @@ The project uses several tools to ensure code quality:
 
 ## 👨‍💻 Author
 
-Progetto universitario sviluppato da Giuseppe Scrofano e Lorenzo La Rocca per il corso QD 2025/2026 — Università degli Studi di Catania.
+University project developed by Giuseppe Scrofano and Lorenzo La Rocca for the "Quality Development" (QD) course
+
+Academic Year 2025/2026 — University of Catania.
 
 
